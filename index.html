@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Letter</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #e6e6fa; /* Lavender background */
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column; /* stack vertically */
+      gap: 25px; /* space between sections */
+    }
+
+    .spotify-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .envelope-container {
+      position: relative;
+      width: 400px;
+      height: 250px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .envelope-container:hover {
+      transform: scale(1.05);
+    }
+
+    .envelope {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .envelope-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: #f8f8ff;
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+      transform-origin: top center;
+      transition: transform 0.8s ease;
+      z-index: 3;
+      border-bottom: 2px solid #d8bfd8;
+    }
+
+    .envelope.opened .envelope-top {
+      transform: rotateX(-180deg);
+    }
+
+    .envelope-body {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 75%;
+      background: #fff;
+      border: 2px solid #d8bfd8;
+      border-top: none;
+    }
+
+    .envelope-seal {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: #d8bfd8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+      z-index: 4;
+      transition: all 0.3s ease;
+    }
+
+    .envelope.opened .envelope-seal {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+
+    .open-instruction {
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #8a2be2;
+      font-size: 20px;
+      font-style: italic;
+      opacity: 0.8;
+      animation: pulse 2s ease-in-out infinite;
+      text-align: center;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 0.4; }
+    }
+
+    .love-letter-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: #fff;
+      width: 90vw;
+      max-width: 600px;
+      height: 80vh;
+      max-height: 700px;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(138, 43, 226, 0.2);
+      opacity: 0;
+      transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .love-letter-container.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .letter-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .letter-title {
+      color: #8a2be2;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .letter-date {
+      color: #6c757d;
+      font-style: italic;
+      font-size: 1.1rem;
+    }
+
+    .letter-content {
+      line-height: 1.8;
+      color: #495057;
+      font-size: 1.1rem;
+      text-align: justify;
+      opacity: 0.85; /* reduced opacity */
+    }
+
+    .letter-content p {
+      margin-bottom: 20px;
+    }
+
+    .highlight {
+      color: #8a2be2;
+      font-weight: bold;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #8a2be2;
+      cursor: pointer;
+    }
+
+    /* Background overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(230, 230, 250, 0.8);
+      backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 9;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+
+ .interactive-button { 
+    display: block; 
+    margin: 30px auto 0; 
+    padding: 12px 30px; 
+    background: linear-gradient(45deg, #8a2be2, #9370db); 
+    color: white; 
+    border: none; 
+    border-radius: 25px; 
+    font-size: 1.1rem; 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3); 
+} 
+
+.interactive-button:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4); 
+} 
+
+.love-message { 
+    text-align: center; 
+    margin-top: 20px; 
+    padding: 15px; 
+    background: rgba(138, 43, 226, 0.1); 
+    border-radius: 10px; 
+    display: none; 
+    animation: slideIn 0.5s ease-out; 
+}
+
+    .love-message p {
+      color: #8a2be2;
+      margin-bottom: 10px;
+      font-size: xx-large;
+      font-weight: bold;
+    }
+
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+      
+    }
+    .us-picture {
+    width: 350px;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: block;
+    margin: 20px auto; /* centers the image */
+}
+.heart {
+  position: fixed;
+  bottom: -30px;
+  font-size: 24px;
+  animation: floatUp linear forwards;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.75; /* Start at 75% */
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 0.75; }
+  100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+}
+
+  </style>
+</head>
+<body>
+    <div id="heartsContainer"></div>
+
+  <!-- Spotify ABOVE -->
+  <div class="spotify-container">
+    <iframe style="border-radius:12px"
+      src="https://open.spotify.com/embed/track/7rpQzmMwS1yW1f0oWxBS9z?utm_source=generator&theme=0"
+      width="100%" height="152" frameborder="0"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy"></iframe>
+  </div>
+
+  <!-- Envelope -->
+  <div class="envelope-container" id="envelopeContainer">
+    <div class="envelope" id="envelope">
+      <div class="envelope-top"></div>
+      <div class="envelope-body"></div>
+      <div class="envelope-seal">🤍</div>
+    </div>
+    <strong><div class="open-instruction">CLICK TO OPEN THE LETTER</div></strong>
+  </div>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Love Letter -->
+  <div class="love-letter-container" id="loveLetter">
+    <button class="close-button" onclick="closeLetter()">&times;</button>
+    <div class="letter-header">
+      <h1 class="letter-title">Hello Jana💜</h1>
+      <strong><p class="letter-date" id="currentDate"></p></strong>
+    </div>
+    <div class="letter-content">
+            <p>For the past few months, a lot of things have happened. These so-called <span class="highlight">"rollercoasters in our life"</span> were the best I could describe. <span class="highlight">A life that is indeed full of mysteries and yet I couldn't even regret every single one of it.</span></p>
+            
+            <p>Before you, <strong>everything was dull, a love that I wished I never stepped into. Hope was even less by the time I could already hold on that romance was something I do not need anymore</strong>. My plans are fixated, get along with the rest of the year and never be the giver again. <strong>Pain was all in my eyes and even envy because of a love that would never reciprocate me. </strong></p>
+            
+            <p> Until you came into my life. Unexpectedly in terms of feelings yet expected to meet a new friend that I'm willing to befriend. The idea of falling in love was never in my mind, entering a relationship after all the misery I've gone to, never crossed my mind. I was an oblivious person. Never knew what you truly meant by those words and actions. <span class="highlight">But, fate did conspire not in a bad way.</span></p>
+            
+            <p><span class="highlight">You've captivated me,</span> my heart and mind went for it as if following the untold paths. I risked, for the love I was never meant to have again. Because that was the day I truly believe, you got me into a trap. You made a trap you thought was broken. But you never knew how much <span class="highlight">I fell for it and yearned for more. </span> A person like you, who is <span class="highlight">quite the opposite of my polar was unique.</span> You're different that it was hard to keep up with you because you're all new to me. This unconditional love you gave me was all I could say that <span class="highlight">you're my other half that I was missing.</span></p>
+            
+            <p>. Words are cliché but if it means saying this then, <span class="highlight">I fell in love with everything about you.</span> This kind of love was the one I never thought of, <span class="highlight">a reciprocator who is all willing to give all the love, a joker who laughs and jokes that are always meant corny yet bring all the smiles in my face and a lover </span> of which before, to this day and to the future who will be with me as long as she promised to. Love is indeed a mystery but here I am to unvail the secrets of what makes it a  <span class="highlight">LOVE.</span></p>
+            
+            <p>To this woman who's reading this, words of wisdom weren't enough on how I'll express my deepest love and desire for you and I'm here to make our bond stronger than before to ask and declare you. <span class="highlight">The love of my life, the sun who shines with a golden smile for me, a cloud who's my calm for I'am the storm and the moon who lights up my darkest times. And my everything, who gives her all body mind and even soul as it is the real you.</span> <strong>Be mine, be my lover officially as my other half for as I'm complete.</strong></p>
+        </div>
+
+        <button class="interactive-button" onclick="showLoveMessage()"> 🤍 </button> 
+        <div class="love-message" id="loveMessage"> <strong>
+            <p style="color: #8a2be2; margin-bottom: 10px; font-size: xx-large; ">BE MY GIRLFRIEND 💜</p></strong> 
+            <img src="us.gif" alt="us pic" class ="us-picture">
+        </div>
+        
+        
+
+  </div>
+
+  <script>
+    function showLoveMessage() {
+      document.getElementById("loveMessage").style.display = "block";
+    }
+  </script>
+</body>
+</html>
+
+    <script>
+        let letterOpen = false;
+
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Open letter function
+        document.getElementById('envelopeContainer').addEventListener('click', function() {
+            if (!letterOpen) {
+                openLetter();
+            }
+        });
+
+        function openLetter() {
+            const envelope = document.getElementById('envelope');
+            const loveLetter = document.getElementById('loveLetter');
+            const overlay = document.getElementById('overlay');
+            const envelopeContainer = document.getElementById('envelopeContainer');
+
+            letterOpen = true;
+
+            // Open envelope animation
+            envelope.classList.add('opened');
+            
+            // Show overlay and letter after envelope opens
+            setTimeout(() => {
+                overlay.classList.add('show');
+                loveLetter.classList.add('show');
+                envelopeContainer.style.opacity = '0.3';
+                
+                // Start typewriter animation
+                setTimeout(() => {
+                    document.getElementById('letterTitle').style.animation = 'typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite';
+                }, 300);
+                
+                // Create some hearts
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(createHeart, i * 200);
+                }
+            }, 800);
+        }
+
+        function closeLetter() {
+            const envelope = document.getElementById('envelope');
+            const loveLetter = document.getElementById('loveLetter');
+            const overlay = document.getElementById('overlay');
+            const envelopeContainer = document.getElementById('envelopeContainer');
+
+            letterOpen = false;
+
+            // Hide letter and overlay
+            loveLetter.classList.remove('show');
+            overlay.classList.remove('show');
+            
+            // Reset envelope after letter closes
+            setTimeout(() => {
+                envelope.classList.remove('opened');
+                envelopeContainer.style.opacity = '1';
+            }, 300);
+
+            // Hide love message if it's showing
+            const loveMessage = document.getElementById('loveMessage');
+            const button = document.querySelector('.interactive-button');
+            if (loveMessage.style.display === 'block') {
+                loveMessage.style.display = 'none';
+                button.textContent ='🤍';
+            }
+        }
+
+       // Create floating hearts
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.innerHTML = '💜';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDelay = Math.random() * 8 + 's';
+    heart.style.animationDuration = (Math.random() * 4 + 8) + 's';
+    // No need to set opacity here, CSS handles it
+
+    document.getElementById('heartsContainer').appendChild(heart);
+
+    setTimeout(() => {
+        heart.remove();
+    }, 12000);
+}
+
+
+// Continuous hearts generator
+function continuousHearts() {
+    createHeart();
+    const delay = Math.random() * 500 + 300; // 0.3–0.8s between hearts
+    setTimeout(continuousHearts, delay);
+}
+
+// Start hearts when page loads
+window.addEventListener('load', () => {
+    continuousHearts();
+});
+
+
+        // Show love message function
+        function showLoveMessage() {
+            const message = document.getElementById('loveMessage');
+            const button = document.querySelector('.interactive-button');
+            
+            if (message.style.display === 'none' || message.style.display === '') {
+                message.style.display = 'block';
+                button.textContent = '🤍';
+                
+                // Create burst of hearts
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(createHeart, i * 150);
+                }
+            } else {
+                message.style.display = 'none';
+                button.textContent = '🤍';
+            }
+        }
+
+        // Add hover effect to highlighted text
+        document.querySelectorAll('.highlight').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Close letter when clicking overlay
+        document.getElementById('overlay').addEventListener('click', closeLetter);
+
+        // Prevent letter from closing when clicking inside the letter
+        document.getElementById('loveLetter').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Welcome animation - create initial heart
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                createHeart();
+            }, 2000);
+        });
+    </script>
+    
+</body>
+</html>
